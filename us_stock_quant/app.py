@@ -170,23 +170,28 @@ def backtest_page():
         
         # 策略参数
         strategy_obj = get_strategy(selected_strategy)
-        params_config = strategy_obj.get_params_config()
+        params_config = strategy_obj.get_params_config() or {}
         
         strategy_params = {}
         if params_config:
             st.subheader("策略参数")
             for param_name, config in params_config.items():
-                if config['type'] == 'float':
-                    strategy_params[param_name] = st.slider(
-                        config['label'],
-                        config['min'], config['max'], config['default'],
-                        step=0.05
-                    )
-                elif config['type'] == 'int':
-                    strategy_params[param_name] = st.slider(
-                        config['label'],
-                        config['min'], config['max'], config['default']
-                    )
+                if config and isinstance(config, dict):
+                    if config.get('type') == 'float':
+                        strategy_params[param_name] = st.slider(
+                            config.get('label', param_name),
+                            float(config.get('min', 0)), 
+                            float(config.get('max', 1)), 
+                            float(config.get('default', 0.5)),
+                            step=0.05
+                        )
+                    elif config.get('type') == 'int':
+                        strategy_params[param_name] = st.slider(
+                            config.get('label', param_name),
+                            int(config.get('min', 0)), 
+                            int(config.get('max', 100)), 
+                            int(config.get('default', 10))
+                        )
         
         # 其他配置
         st.subheader("回测配置")
